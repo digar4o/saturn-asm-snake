@@ -1,0 +1,599 @@
+************************************************************
+************************************************************
+**
+**	Name: Snake Game
+**	
+**	Author: Martin Radulov
+**	
+**	Abstract: Written for the HP48S using a universal
+**		  entry point list - uentries.o
+**
+**	Entry: 	None
+**	Exit: 	None
+**
+**=========================================================
+* File	snake.s	15
+
+* File	snake.s	16
+
+* File	snake.s	17
+* ASSEMBLE
+* File	snake.s	18
+	NIBASC /HPHP48-L/
+* File	snake.s	19
+* RPL
+* File	snake.s	20
+
+* File	snake.s	21
+	CON(5)	=DOCOL
+* File	snake.s	22
+
+* File	snake.s	23
+	CON(5)	=RECLAIMDISP
+* File	snake.s	24
+	CON(5)	=TURNMENUOFF
+* File	snake.s	25
+
+* File	snake.s	26
+	CON(5)	=ABUFF
+* File	snake.s	27
+
+* File	snake.s	28
+	CON(5)	=DOBINT
+	CON(5)	#F
+* File	snake.s	29
+	CON(5)	=ONE
+* File	snake.s	30
+	CON(5)	=MAKEGROB
+* File	snake.s	31
+	CON(5)	=DO>STR
+* File	snake.s	32
+
+* File	snake.s	33
+	CON(5)	=DOBINT
+	CON(5)	56
+	CON(5)	=TestSysFlag
+* File	snake.s	34
+
+* File	snake.s	35
+* CODE	
+	CON(5)	=DOCODE
+	REL(5)	LBL000
+* File	snake.s	36
+
+**********************************************************
+*
+* RPL code above creates the following objects on stack:
+*
+* L3: Address pointing to ABUFF (start of display memory)
+* L2: String object of F*5 nibbles for variables
+* L1: Contents of flag 56 (sound off/on)
+*
+**********************************************************
+*
+*    Status Flags in use (ST register):
+*     
+*
+* File	snake.s	50
+
+* File	snake.s	51
+
+* File	snake.s	52
+
+* File	snake.s	53
+	ST=0	15		Interrupts off
+* File	snake.s	54
+	INTOFF			Turns off keyboard int.
+* File	snake.s	55
+	P=	0
+* File	snake.s	56
+
+* File	snake.s	57
+	ST=0	11		Sound on
+* File	snake.s	58
+	GOSBVL	=popflag	Pop flag from stack L1 and set carry bit to 1 if TRUE
+* File	snake.s	59
+	GONC	DATA		Goto DATA if not set and keep sound on
+* File	snake.s	60
+	ST=1	11		Otherwise, turn that shit off
+* File	snake.s	61
+
+* File	snake.s	62
+
+* File	snake.s	63
+DATA				Lets store some initial values
+* File	snake.s	64
+	GOSBVL	=SAVPTR		Save RPL pointers so they can be restored on game exit
+* File	snake.s	65
+	A=DAT1	A		Read variable string pointer into A
+* File	snake.s	66
+	A=A+CON	A,10		Add 10 nibbles to skip past string header/prolog
+* File	snake.s	67
+	R0=A.F	A		Keep this in R0 scratch register
+* File	snake.s	68
+	D1=D1+	5		Go ahead to next stack level 5 nibbles ahead
+* File	snake.s	69
+	A=DAT1	A		Read ABUFF pointer
+* File	snake.s	70
+	LC(5)	20
+* File	snake.s	71
+	C=C+A	A		Skip 20 nibbles past ABUFF prolog to pointer address
+* File	snake.s	72
+	GOSUB 	srS5		Save in 5th set of 5 nibble of string
+* File	snake.s	73
+	GOSUB 	INIT		Skip executing storage routines
+* File	snake.s	74
+
+********************************************************
+*
+* Variable storage system goes here, put value to store
+* into A[A] 
+*
+********************************************************
+* File	snake.s	81
+
+* File	snake.s	82
+srR0	LC(5)	0		
+* File	snake.s	83
+	GOTO srRC		Pass number of variable to store into to srRC
+* File	snake.s	84
+
+* File	snake.s	85
+srR1    LC(5)   1               
+* File	snake.s	86
+        GOTO srRC              
+* File	snake.s	87
+
+* File	snake.s	88
+srR2    LC(5)   2 
+* File	snake.s	89
+        GOTO srRC   
+* File	snake.s	90
+
+* File	snake.s	91
+srR3    LC(5)   3 
+* File	snake.s	92
+        GOTO srRC   
+* File	snake.s	93
+
+* File	snake.s	94
+srR4    LC(5)   4 
+* File	snake.s	95
+        GOTO srRC   
+* File	snake.s	96
+
+* File	snake.s	97
+srR5    LC(5)   5 
+* File	snake.s	98
+        GOTO srRC   
+* File	snake.s	99
+
+* File	snake.s	100
+srR6    LC(5)   6 
+* File	snake.s	101
+        GOTO srRC   
+* File	snake.s	102
+
+* File	snake.s	103
+srR7    LC(5)   7 
+* File	snake.s	104
+        GOTO srRC   
+* File	snake.s	105
+
+* File	snake.s	106
+srR8    LC(5)   8 
+* File	snake.s	107
+        GOTO srRC   
+* File	snake.s	108
+
+* File	snake.s	109
+srR9    LC(5)   9 
+* File	snake.s	110
+        GOTO srRC   
+* File	snake.s	111
+
+* File	snake.s	112
+srR10   LC(5)   10 
+* File	snake.s	113
+        GOTO srRC   
+* File	snake.s	114
+
+* File	snake.s	115
+srR11   LC(5)   11 
+* File	snake.s	116
+        GOTO srRC   
+* File	snake.s	117
+
+* File	snake.s	118
+srR12   LC(5)   12 
+* File	snake.s	119
+        GOTO srRC   
+* File	snake.s	120
+
+* File	snake.s	121
+srR13   LC(5)   13 
+* File	snake.s	122
+        GOTO srRC   
+* File	snake.s	123
+
+* File	snake.s	124
+srR14    LC(5)   14 
+* File	snake.s	125
+
+* File	snake.s	126
+
+* File	snake.s	127
+srRC	ACEX	A		Swaps A and C registers
+* File	snake.s	128
+	CD0EX			Swaps C and D0
+* File	snake.s	129
+	RSTK=C			Let's keep the original value of D0 on stack so we can restore it
+* File	snake.s	130
+	C=A	A		C now contains number of variable to store into
+* File	snake.s	131
+	C=C+C	A		Several additions to multiply by 5 and get offset to store into
+* File	snake.s	132
+	C=C+C	A
+* File	snake.s	133
+	C=C+A	A
+* File	snake.s	134
+	A=R0.F	A		Get address of variable string
+* File	snake.s	135
+	A=A+C	A		Add offset
+* File	snake.s	136
+	AD0EX			Address now in D0, also restores A[A]
+* File	snake.s	137
+	C=DAT0	A	
+* File	snake.s	138
+	CD0EX
+* File	snake.s	139
+	C=RSTK			Restore D0 value and put value of variable into C
+* File	snake.s	140
+	CD0EX
+* File	snake.s	141
+	RTN
+* File	snake.s	142
+
+* File	snake.s	143
+
+* File	snake.s	144
+srS0	RSTK=C			Moves value to store from C to RSTK
+* File	snake.s	145
+	LC(5)	0		Loads variable no. to store into to C
+* File	snake.s	146
+	GOTO srSC
+* File	snake.s	147
+
+* File	snake.s	148
+srS1    RSTK=C
+* File	snake.s	149
+        LC(5)   1
+* File	snake.s	150
+        GOTO srSC
+* File	snake.s	151
+
+* File	snake.s	152
+srS2    RSTK=C
+* File	snake.s	153
+        LC(5)   2
+* File	snake.s	154
+        GOTO srSC
+* File	snake.s	155
+
+* File	snake.s	156
+srS3    RSTK=C
+* File	snake.s	157
+        LC(5)   3
+* File	snake.s	158
+        GOTO srSC
+* File	snake.s	159
+
+* File	snake.s	160
+srS4    RSTK=C
+* File	snake.s	161
+        LC(5)   4
+* File	snake.s	162
+        GOTO srSC
+* File	snake.s	163
+
+* File	snake.s	164
+srS5    RSTK=C
+* File	snake.s	165
+        LC(5)   5
+* File	snake.s	166
+        GOTO srSC
+* File	snake.s	167
+
+* File	snake.s	168
+srS6    RSTK=C
+* File	snake.s	169
+        LC(5)   6
+* File	snake.s	170
+        GOTO srSC
+* File	snake.s	171
+
+* File	snake.s	172
+srS7    RSTK=C
+* File	snake.s	173
+        LC(5)   7
+* File	snake.s	174
+        GOTO srSC
+* File	snake.s	175
+
+* File	snake.s	176
+srS8    RSTK=C
+* File	snake.s	177
+        LC(5)   8
+* File	snake.s	178
+        GOTO srSC
+* File	snake.s	179
+
+* File	snake.s	180
+srS9    RSTK=C
+* File	snake.s	181
+        LC(5)   9
+* File	snake.s	182
+        GOTO srSC
+* File	snake.s	183
+
+* File	snake.s	184
+srS10   RSTK=C
+* File	snake.s	185
+        LC(5)   10
+* File	snake.s	186
+        GOTO srSC
+* File	snake.s	187
+
+* File	snake.s	188
+srS11   RSTK=C
+* File	snake.s	189
+        LC(5)   11
+* File	snake.s	190
+        GOTO srSC
+* File	snake.s	191
+
+* File	snake.s	192
+srS12   RSTK=C
+* File	snake.s	193
+        LC(5)   12
+* File	snake.s	194
+        GOTO srSC
+* File	snake.s	195
+
+* File	snake.s	196
+srS13   RSTK=C
+* File	snake.s	197
+        LC(5)   13
+* File	snake.s	198
+        GOTO srSC
+* File	snake.s	199
+
+* File	snake.s	200
+srS14   RSTK=C
+* File	snake.s	201
+        LC(5)   14
+* File	snake.s	202
+
+* File	snake.s	203
+srSC	GOSBVL	=ASLW5		Calls ROM routine to shift A left 5 nibbles to preserve A[A] value
+* File	snake.s	204
+	AD0EX			Get D0 into A[A]
+* File	snake.s	205
+	GOSBVL	=ASLW5		Shift another 5 nibbles to the right to save D0
+* File	snake.s	206
+	A=C	A
+* File	snake.s	207
+	C=C+C	A	
+* File	snake.s	208
+	C=C+C	A	
+* File	snake.s	209
+	C=C+A	A
+* File	snake.s	210
+	A=R0.F 	A
+* File	snake.s	211
+	A=A+C	A	
+* File	snake.s	212
+	D0=A	
+* File	snake.s	213
+	C=RSTK
+* File	snake.s	214
+	DAT0=C 	A		Write value into correct part of string	
+* File	snake.s	215
+	GOSBVL =ASRW5		Start shifting back to restore DO and A[A]
+* File	snake.s	216
+	D0=A	
+* File	snake.s	217
+	GOSBVL =ASRW5
+* File	snake.s	218
+	RTN
+* File	snake.s	219
+
+* File	snake.s	220
+
+* File	snake.s	221
+INIT
+* File	snake.s	222
+	C=0	A		Y co-ord top line
+* File	snake.s	223
+	GOSUB	srS0		
+* File	snake.s	224
+
+* File	snake.s	225
+	LC(5)	8		Y co-ord middle line for scoreboard
+* File	snake.s	226
+	GOSUB 	srS1		
+* File	snake.s	227
+
+* File	snake.s	228
+	LC(5)	63		Y co-ord bottom line
+* File	snake.s	229
+	GOSUB	srS2
+* File	snake.s	230
+
+* File	snake.s	231
+	LC(5)	22		Starting x co-ord for snake, constant for now, randomise later
+* File	snake.s	232
+	GOSUB	srS3	
+* File	snake.s	233
+
+* File	snake.s	234
+	LC(5)	75		Starting y co-ord for snake
+* File	snake.s	235
+	GOSUB	srS4	
+* File	snake.s	236
+
+* File	snake.s	237
+	GOSUB	drawScreen	Draw empty screen, lines and score text
+* File	snake.s	238
+
+* File	snake.s	239
+
+* File	snake.s	240
+drawScreen
+* File	snake.s	241
+	GOSUB srR0		Top Line
+* File	snake.s	242
+	LA(5)	34
+* File	snake.s	243
+	GOSBVL	=MUL#		Multiply row size by numbers of row to get offset
+* File	snake.s	244
+	GOSUB	srR5		Load ABUFF pointer
+* File	snake.s	245
+	C=C+B	A		Add offet to start to get address for line start now in C
+* File	snake.s	246
+	GOSUB drawLine		go draw top line
+* File	snake.s	247
+	GOSUB 	srR1
+* File	snake.s	248
+	LA(5)	34
+* File	snake.s	249
+	GOSBVL	=MUL#		
+* File	snake.s	250
+	GOSUB	srR5
+* File	snake.s	251
+	C=C+B	A
+* File	snake.s	252
+	GOSUB	drawLine	go draw middle line
+* File	snake.s	253
+	GOSUB	srR2
+* File	snake.s	254
+	LA(5)	34
+* File	snake.s	255
+	GOSBVL	=MUL#
+* File	snake.s	256
+	GOSUB 	srR5
+* File	snake.s	257
+	C=C+B	A
+* File	snake.s	258
+	GOSUB	drawLine	go draw top line
+* File	snake.s	259
+
+* File	snake.s	260
+
+* File	snake.s	261
+keyLoop				Start keyboard loop, just exits on space for now
+* File	snake.s	262
+	LC(3)	001
+* File	snake.s	263
+	OUT=C
+* File	snake.s	264
+	GOSBVL	#01160
+* File	snake.s	265
+	?CBIT=0	1
+* File	snake.s	266
+	GOYES	keyLoop
+* File	snake.s	267
+	ST=1	15
+* File	snake.s	268
+	GOVLNG	=GETPRTLOOP	Exits
+* File	snake.s	269
+
+* File	snake.s	270
+
+* File	snake.s	271
+drawLine			Call this to draw a line that spans a row, load y-coord into C before jmp
+* File	snake.s	272
+	D0=C	A
+* File	snake.s	273
+	C=0	W
+* File	snake.s	274
+	C=C-1	W		load FFFFFF into C,warning carry bit set now
+* File	snake.s	275
+	DAT0=C	W
+* File	snake.s	276
+	D0=D0+	16		Drawing two sets of 64 pixels (W field) and one set of 8 (B field)	
+* File	snake.s	277
+	DAT0=C	W	
+* File	snake.s	278
+	D0=D0+	16
+* File	snake.s	279
+	DAT0=C	B	
+* File	snake.s	280
+	RTN
+* File	snake.s	281
+
+* File	snake.s	282
+
+* File	snake.s	283
+* ENDCODE
+LBL000
+* File	snake.s	284
+	CON(5)	=TURNMENUON
+* File	snake.s	285
+	CON(5)	=RECLAIMDISP
+* File	snake.s	286
+
+* File	snake.s	287
+
+* File	snake.s	288
+	CON(5)	=SEMI
+* File	snake.s	289
+
+* File	snake.s	290
+
+* File	snake.s	291
+
+* File	snake.s	292
+
+* File	snake.s	293
+
+* File	snake.s	294
+
+* File	snake.s	295
+
+* File	snake.s	296
+
+* File	snake.s	297
+
+* File	snake.s	298
+
+* File	snake.s	299
+
+* File	snake.s	300
+
+* File	snake.s	301
+
+* File	snake.s	302
+
+* File	snake.s	303
+
+* File	snake.s	304
+
+* File	snake.s	305
+
+* File	snake.s	306
+
+* File	snake.s	307
+
+* File	snake.s	308
+
+* File	snake.s	309
+
+* File	snake.s	310
+
+* File	snake.s	311
+
+* File	snake.s	312
+
+* File	snake.s	313
+
