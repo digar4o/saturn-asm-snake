@@ -228,11 +228,14 @@ INIT
 	LC(5)	63		Y co-ord bottom line
 	GOSUB	srS2
 	
-	LC(5)	22		Starting x co-ord for snake, constant for now, randomise later
+	LC(5)	56		Starting x co-ord for snake, constant for now, randomise later
 	GOSUB	srS3	
 
-	LC(5)	75		Starting y co-ord for snake
+	LC(5)	30		Starting y co-ord for snake
 	GOSUB	srS4	
+	
+	LC(5)	3		Store initial snake length in pixels
+	GOSUB	srS6
 
 	GOSUB	drawScreen	Draw empty screen, lines and score text
 	
@@ -256,7 +259,10 @@ drawScreen
 	GOSUB 	srR5
 	C=C+B	A
 	GOSUB	drawLine	go draw top line
-	
+	GOSUB	drawTopText	go draw Score text
+	GOSUB	srR6		get snake length
+	D=C	A
+	GOSUB	drawSnake 	go draw snake, call with number of squares in D
 
 keyLoop				Start keyboard loop, just exits on space for now
 	LC(3)	001
@@ -266,6 +272,48 @@ keyLoop				Start keyboard loop, just exits on space for now
 	GOYES	keyLoop
 	ST=1	15
 	GOVLNG	=GETPRTLOOP	Exits
+
+
+
+drawSnake
+	?D=0	A
+	RTNYES
+	GOSUB	srR4		Get snake y-coord
+	LA(5)	34
+	GOSBVL	=MUL#		B[A] now equals offset
+	GOSUB	srR3			Get snake x-coord
+	CSRB.F	A
+	CSRB.F	A
+	C=C-D	A		Always draw next square to the left for now
+	B=B+C	A
+	GOSUB 	srR5
+	C=C+B	A
+	D0=C	
+	GOSUB	drawSquare
+	D=D-1	A		one square drawn, subtract from squares left to draw
+	GOSUB	drawSnake	draw next part of snake
+	RTN	
+
+
+
+drawSquare			Call with D0 set to rightmost,uppermost edge of square to draw
+	LCHEX	15		mask for 011, written to display as 1100, so left two pixels of nibble masked
+	A=DAT0	1
+	C=C&A	B
+	C=C+CON	B,15
+	DAT0=C	1		write top three pixels
+	GOSUB	D0DOWN		Use d0down to change pointer to a row ahead
+	A=DAT0	1
+	C=C&A	B	
+	C=C+CON	B,15
+	DAT0=C	1		write next three pixels of square
+	GOSUB	D0DOWN
+	A=DAT0	1
+	C=C&A	B
+	C=C+CON	B,15
+	DAT0=C	1			write bottom three pixels
+	RTN		
+				
 	
 
 drawLine			Call this to draw a line that spans a row, load y-coord into C before jmp
@@ -277,9 +325,19 @@ drawLine			Call this to draw a line that spans a row, load y-coord into C before
 	DAT0=C	W	
 	D0=D0+	16
 	DAT0=C	B	
+	RTN		
+
+drawTopText
+	LC(5)	3		Y-coord where text starts
+	LA(5)	34		DOES NOTHING FOR NOW, ADD LATER
 	RTN
 
 	
+D0DOWN
+	D0=D0+	16
+	D0=D0+	16
+	D0=D0+	2
+	RTN
 ENDCODE
 	TURNMENUON
 	RECLAIMDISP

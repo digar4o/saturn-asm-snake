@@ -431,136 +431,135 @@ INIT
 * File	snake.s	230
 
 * File	snake.s	231
-	LC(5)	22		Starting x co-ord for snake, constant for now, randomise later
+	LC(5)	56		Starting x co-ord for snake, constant for now, randomise later
 * File	snake.s	232
 	GOSUB	srS3	
 * File	snake.s	233
 
 * File	snake.s	234
-	LC(5)	75		Starting y co-ord for snake
+	LC(5)	30		Starting y co-ord for snake
 * File	snake.s	235
 	GOSUB	srS4	
 * File	snake.s	236
 
 * File	snake.s	237
-	GOSUB	drawScreen	Draw empty screen, lines and score text
+	LC(5)	3		Store initial snake length in pixels
 * File	snake.s	238
-
+	GOSUB	srS6
 * File	snake.s	239
 
 * File	snake.s	240
-drawScreen
+	GOSUB	drawScreen	Draw empty screen, lines and score text
 * File	snake.s	241
-	GOSUB srR0		Top Line
+
 * File	snake.s	242
-	LA(5)	34
+
 * File	snake.s	243
-	GOSBVL	=MUL#		Multiply row size by numbers of row to get offset
+drawScreen
 * File	snake.s	244
-	GOSUB	srR5		Load ABUFF pointer
+	GOSUB srR0		Top Line
 * File	snake.s	245
-	C=C+B	A		Add offet to start to get address for line start now in C
+	LA(5)	34
 * File	snake.s	246
-	GOSUB drawLine		go draw top line
+	GOSBVL	=MUL#		Multiply row size by numbers of row to get offset
 * File	snake.s	247
-	GOSUB 	srR1
+	GOSUB	srR5		Load ABUFF pointer
 * File	snake.s	248
-	LA(5)	34
+	C=C+B	A		Add offet to start to get address for line start now in C
 * File	snake.s	249
-	GOSBVL	=MUL#		
+	GOSUB drawLine		go draw top line
 * File	snake.s	250
-	GOSUB	srR5
+	GOSUB 	srR1
 * File	snake.s	251
-	C=C+B	A
-* File	snake.s	252
-	GOSUB	drawLine	go draw middle line
-* File	snake.s	253
-	GOSUB	srR2
-* File	snake.s	254
 	LA(5)	34
-* File	snake.s	255
-	GOSBVL	=MUL#
-* File	snake.s	256
-	GOSUB 	srR5
-* File	snake.s	257
+* File	snake.s	252
+	GOSBVL	=MUL#		
+* File	snake.s	253
+	GOSUB	srR5
+* File	snake.s	254
 	C=C+B	A
+* File	snake.s	255
+	GOSUB	drawLine	go draw middle line
+* File	snake.s	256
+	GOSUB	srR2
+* File	snake.s	257
+	LA(5)	34
 * File	snake.s	258
-	GOSUB	drawLine	go draw top line
+	GOSBVL	=MUL#
 * File	snake.s	259
-
+	GOSUB 	srR5
 * File	snake.s	260
-
+	C=C+B	A
 * File	snake.s	261
-keyLoop				Start keyboard loop, just exits on space for now
+	GOSUB	drawLine	go draw top line
 * File	snake.s	262
-	LC(3)	001
+	GOSUB	drawTopText	go draw Score text
 * File	snake.s	263
-	OUT=C
+	GOSUB	srR6		get snake length
 * File	snake.s	264
-	GOSBVL	#01160
+	D=C	A
 * File	snake.s	265
-	?CBIT=0	1
+	GOSUB	drawSnake 	go draw snake, call with number of squares in D
 * File	snake.s	266
-	GOYES	keyLoop
+
 * File	snake.s	267
-	ST=1	15
+keyLoop				Start keyboard loop, just exits on space for now
 * File	snake.s	268
-	GOVLNG	=GETPRTLOOP	Exits
+	LC(3)	001
 * File	snake.s	269
-
+	OUT=C
 * File	snake.s	270
-
+	GOSBVL	#01160
 * File	snake.s	271
-drawLine			Call this to draw a line that spans a row, load y-coord into C before jmp
+	?CBIT=0	1
 * File	snake.s	272
-	D0=C	A
+	GOYES	keyLoop
 * File	snake.s	273
-	C=0	W
+	ST=1	15
 * File	snake.s	274
-	C=C-1	W		load FFFFFF into C,warning carry bit set now
+	GOVLNG	=GETPRTLOOP	Exits
 * File	snake.s	275
-	DAT0=C	W
+
 * File	snake.s	276
-	D0=D0+	16		Drawing two sets of 64 pixels (W field) and one set of 8 (B field)	
+
 * File	snake.s	277
-	DAT0=C	W	
+
 * File	snake.s	278
-	D0=D0+	16
+drawSnake
 * File	snake.s	279
-	DAT0=C	B	
+	?D=0	A
 * File	snake.s	280
-	RTN
+	RTNYES
 * File	snake.s	281
-
+	GOSUB	srR4		Get snake y-coord
 * File	snake.s	282
-
+	LA(5)	34
 * File	snake.s	283
-* ENDCODE
-LBL000
+	GOSBVL	=MUL#		B[A] now equals offset
 * File	snake.s	284
-	CON(5)	=TURNMENUON
+	GOSUB	srR3			Get snake x-coord
 * File	snake.s	285
-	CON(5)	=RECLAIMDISP
+	CSRB.F	A
 * File	snake.s	286
-
+	CSRB.F	A
 * File	snake.s	287
-
+	C=C-D	A		Always draw next square to the left for now
 * File	snake.s	288
-	CON(5)	=SEMI
+	B=B+C	A
 * File	snake.s	289
-
+	GOSUB 	srR5
 * File	snake.s	290
-
+	C=C+B	A
 * File	snake.s	291
-
+	D0=C	
 * File	snake.s	292
-
+	GOSUB	drawSquare
 * File	snake.s	293
-
+	D=D-1	A		one square drawn, subtract from squares left to draw
 * File	snake.s	294
-
+	GOSUB	drawSnake	draw next part of snake
 * File	snake.s	295
-
+	RTN	
 * File	snake.s	296
 
 * File	snake.s	297
@@ -568,32 +567,149 @@ LBL000
 * File	snake.s	298
 
 * File	snake.s	299
-
+drawSquare			Call with D0 set to rightmost,uppermost edge of square to draw
 * File	snake.s	300
-
+	LCHEX	15		mask for 011, written to display as 1100, so left two pixels of nibble masked
 * File	snake.s	301
-
+	A=DAT0	1
 * File	snake.s	302
-
+	C=C&A	B
 * File	snake.s	303
-
+	C=C+CON	B,15
 * File	snake.s	304
-
+	DAT0=C	1		write top three pixels
 * File	snake.s	305
-
+	GOSUB	D0DOWN		Use d0down to change pointer to a row ahead
 * File	snake.s	306
-
+	A=DAT0	1
 * File	snake.s	307
-
+	C=C&A	B	
 * File	snake.s	308
-
+	C=C+CON	B,15
 * File	snake.s	309
-
+	DAT0=C	1		write next three pixels of square
 * File	snake.s	310
-
+	GOSUB	D0DOWN
 * File	snake.s	311
-
+	A=DAT0	1
 * File	snake.s	312
-
+	C=C&A	B
 * File	snake.s	313
+	C=C+CON	B,15
+* File	snake.s	314
+	DAT0=C	1			write bottom three pixels
+* File	snake.s	315
+	RTN		
+* File	snake.s	316
+
+* File	snake.s	317
+
+* File	snake.s	318
+
+* File	snake.s	319
+drawLine			Call this to draw a line that spans a row, load y-coord into C before jmp
+* File	snake.s	320
+	D0=C	A
+* File	snake.s	321
+	C=0	W
+* File	snake.s	322
+	C=C-1	W		load FFFFFF into C,warning carry bit set now
+* File	snake.s	323
+	DAT0=C	W
+* File	snake.s	324
+	D0=D0+	16		Drawing two sets of 64 pixels (W field) and one set of 8 (B field)	
+* File	snake.s	325
+	DAT0=C	W	
+* File	snake.s	326
+	D0=D0+	16
+* File	snake.s	327
+	DAT0=C	B	
+* File	snake.s	328
+	RTN		
+* File	snake.s	329
+
+* File	snake.s	330
+drawTopText
+* File	snake.s	331
+	LC(5)	3		Y-coord where text starts
+* File	snake.s	332
+	LA(5)	34		DOES NOTHING FOR NOW, ADD LATER
+* File	snake.s	333
+	RTN
+* File	snake.s	334
+
+* File	snake.s	335
+
+* File	snake.s	336
+D0DOWN
+* File	snake.s	337
+	D0=D0+	16
+* File	snake.s	338
+	D0=D0+	16
+* File	snake.s	339
+	D0=D0+	2
+* File	snake.s	340
+	RTN
+* File	snake.s	341
+* ENDCODE
+LBL000
+* File	snake.s	342
+	CON(5)	=TURNMENUON
+* File	snake.s	343
+	CON(5)	=RECLAIMDISP
+* File	snake.s	344
+
+* File	snake.s	345
+
+* File	snake.s	346
+	CON(5)	=SEMI
+* File	snake.s	347
+
+* File	snake.s	348
+
+* File	snake.s	349
+
+* File	snake.s	350
+
+* File	snake.s	351
+
+* File	snake.s	352
+
+* File	snake.s	353
+
+* File	snake.s	354
+
+* File	snake.s	355
+
+* File	snake.s	356
+
+* File	snake.s	357
+
+* File	snake.s	358
+
+* File	snake.s	359
+
+* File	snake.s	360
+
+* File	snake.s	361
+
+* File	snake.s	362
+
+* File	snake.s	363
+
+* File	snake.s	364
+
+* File	snake.s	365
+
+* File	snake.s	366
+
+* File	snake.s	367
+
+* File	snake.s	368
+
+* File	snake.s	369
+
+* File	snake.s	370
+
+* File	snake.s	371
 
