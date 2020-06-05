@@ -44,9 +44,12 @@ CODE
 *
 **********************************************************
 *
-*    Status Flags in use (ST register):
-*     
-*
+* Status Flags in use (ST register):
+* ST 0: UP
+* ST 1: DOWN
+* ST 2: LEFT
+* ST 3: RIGHT
+* ST 11: SOUND ON/OFF
 
 
 
@@ -70,7 +73,7 @@ DATA				Lets store some initial values
 	LC(5)	20
 	C=C+A	A		Skip 20 nibbles past ABUFF prolog to pointer address
 	GOSUB 	srS5		Save in 5th set of 5 nibble of string
-	GOSUB 	INIT		Skip executing storage routines
+	GOTO 	INIT		Skip executing storage routines
 
 ********************************************************
 *
@@ -219,6 +222,13 @@ srSC	GOSBVL	=ASLW5		Calls ROM routine to shift A left 5 nibbles to preserve A[A]
 
 
 INIT
+	ST=0	0		Clear all used status flags
+	ST=0	1
+	ST=0	2
+	ST=0	3		But set 3 to 1, as snake will start by moving right
+	ST=0	4
+	ST=0	5
+
 	C=0	A		Y co-ord top line
 	GOSUB	srS0		
 
@@ -237,15 +247,18 @@ INIT
 	LC(5)	3		Store initial snake length in pixels
 	GOSUB	srS6
 
+	LC(5)	2000		Snake update delay in ticks
+	GOSUB	srS7
+
 	GOSUB	drawScreen	Draw empty screen, lines and score text
 	
-
+		
 drawScreen
 	GOSUB srR0		Top Line
 	LA(5)	34
 	GOSBVL	=MUL#		Multiply row size by numbers of row to get offset
 	GOSUB	srR5		Load ABUFF pointer
-	C=C+B	A		Add offet to start to get address for line start now in C
+	C=C+B	A		Add offset to start to get address for line start now in C
 	GOSUB drawLine		go draw top line
 	GOSUB 	srR1
 	LA(5)	34
@@ -258,23 +271,28 @@ drawScreen
 	GOSBVL	=MUL#
 	GOSUB 	srR5
 	C=C+B	A
-	GOSUB	drawLine	go draw top line
+	GOSUB	drawLine	go draw bottom line
 	GOSUB	drawTopText	go draw Score text
 	GOSUB	srR6		get snake length
 	D=C	A
 	GOSUB	drawSnake 	go draw snake, call with number of squares in D
 
-keyLoop				Start keyboard loop, just exits on space for now
+mainLoop
+	GOSUB	delayInit
+	
+keyLoop
+	GOSUB	delayCheck
+	?ST=1	15
+	GOYES	mainLoop
 	LC(3)	001
 	OUT=C
 	GOSBVL	#01160
 	?CBIT=0	1
 	GOYES	keyLoop
 	ST=1	15
-	GOVLNG	=GETPRTLOOP	Exits
-
-
-
+	GOSBVL	=GETPTR
+	GOVLNG	=LOOP	Exits
+	
 drawSnake
 	?D=0	A
 	RTNYES
@@ -325,12 +343,40 @@ drawLine			Call this to draw a line that spans a row, load y-coord into C before
 	DAT0=C	W	
 	D0=D0+	16
 	DAT0=C	B	
+	RTN
+
+
+
+delayInit			Get time and store into R3 scratch reg.
+	GOSBVL	=GetTimChk
+	R3=C	
 	RTN		
+
+
+delayCheck			Returns 1 on st 5 if we are ready to update snake
+	C=0	W
+	GOSUBL	srR7
+	R4=C
+	GOSBVL	=GetTimChk
+	A=R3
+	P=	12
+	C=C-A	WP
+	A=R4
+	?A>=C	WP
+	GOYES delayMore
+	P=	0
+	ST=1	5
+	RTN
+delayMore
+	P=	0
+	ST=0	5
+	RTN
 
 drawTopText
 	LC(5)	3		Y-coord where text starts
 	LA(5)	34		DOES NOTHING FOR NOW, ADD LATER
 	RTN
+
 
 	
 D0DOWN
