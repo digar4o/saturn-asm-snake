@@ -321,7 +321,7 @@ drawSnake
 	GOSUB 	srR5
 	C=C+B	A
 	D0=C	
-	GOSUB	drawSquare
+	GOSUB	drawSquare2
 	D=D-1	A		one square drawn, subtract from squares left to draw
 	GOSUB	drawSnake	draw next part of snake
 	RTN	
@@ -347,7 +347,13 @@ drawSquare			Call with D0 set to rightmost,uppermost edge of square to draw
 	RTN		
 				
 	
-
+drawSquare2
+	LC(5)	15
+	DAT0=C	1
+	GOSUB	D0DOWN
+	LC(5)	15
+	DAT0=C	1
+	RTN
 drawLine			Call this to draw a line that spans a row, load y-coord into C before jmp
 	D0=C	A
 	C=0	W
