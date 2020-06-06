@@ -225,7 +225,7 @@ INIT
 	ST=0	0		Clear all used status flags
 	ST=0	1
 	ST=0	2
-	ST=1	3		But set 3 to 1, as snake will start by moving right
+	ST=0	3		But set 3 to 1, as snake will start by moving right
 	ST=0	4
 	ST=0	5
 	ST=0	6
@@ -245,7 +245,7 @@ INIT
 	LC(5)	30		Starting y co-ord for snake
 	GOSUB	srS4	
 	
-	LC(5)	3		Store initial snake length in pixels
+	LC(5)	0		Store initial snake length in pixels
 	GOSUB	srS6
 
 	LC(5)	2000		Snake update delay in ticks
@@ -296,19 +296,100 @@ drawScreen
 mainLoop
 	GOSUB	delayInit	
 keyLoop
-	GOSUB	delayCheck
-	?ST=1	5
-	GOYES	goRight
-
+	GOSUB	delayCheck	Update current time
+	?ST=0	5		Has timer expired?
+	GOYES	keyLoopc
+	GOSUBL	updateSnake	Yes? Go do snake update
 	
-	LC(3)	001
+
+keyLoopc
+	LCHEX	5FF		Check if any key is being pressed on keyboard including [ON]
 	OUT=C
-	GOSBVL	#01160
+	GOSBVL	=CINRTN
+	LAHEX	0803F		IN mask for all keys, found using OR on all IN values
+	A=A&C	A
+	?A#0	A
+	GOYES	keySpc		go check if its space being pressed
+	GOTO	keyLoop		Otherwise check again
+
+keySpc	LC(3)	001		Check if [SPC] is being pressed
+	OUT=C
+	GOSBVL	=CINRTN
 	?CBIT=0	1
-	GOYES	keyLoop
-	ST=1	15
+	GOYES	keyUp		No? Check next key	
+	ST=1	15		Yes? Return to RPL
 	GOSBVL	=GETPTR
 	GOVLNG	=LOOP	Exits
+
+keyUp
+	LCHEX	080
+	OUT=C
+	GOSBVL	=CINRTN
+	?CBIT=0	1
+	GOYES	keyLeft		No? Go check left?
+	ST=1	0		Yes? Set the UP movement flag and return to loop
+	ST=0	1
+	ST=0	2
+	ST=0	3
+	GOTO	keyLoop
+
+keyLeft
+	LCHEX   040
+        OUT=C
+        GOSBVL  =CINRTN
+        ?CBIT=0 2
+        GOYES   keyDown		No? Go check down
+        ST=0    0		Yes? Set the left movement flag and return to loop
+        ST=0    1
+        ST=1    2
+        ST=0    3
+	GOTO keyLoop
+
+
+keyDown
+        LCHEX   040
+        OUT=C
+        GOSBVL  =CINRTN
+        ?CBIT=0	1
+        GOYES   keyRight	No? Go check left?
+        ST=0	0		Yes? Set the UP movement flag and return to loop
+        ST=1    1
+        ST=0    2
+        ST=0    3
+        GOTO keyLoop
+
+keyRight
+	LCHEX   040
+        OUT=C
+        GOSBVL  =CINRTN
+        ?CBIT=0 0
+        GOYES   keyRight        No? Go check left?
+        ST=0    0               Yes? Set the UP movement flag and return to loop
+        ST=0    1
+        ST=0    2
+        ST=1    3
+        GOTO keyLoop
+
+
+
+updateSnake
+	?ST=1	0
+	GOYES	goUp
+	?ST=1	1
+	GOYES	goDown
+	?ST=1	2
+	GOYES	goLeft
+	?ST=1	3
+	GOYES	goRight
+
+goUp
+	GOTO mainLoop
+
+goDown
+	GOTO mainLoop
+
+goLeft
+	GOTO mainLoop
 
 
 goRight
@@ -325,11 +406,6 @@ goRight
 	D=C	A
 	GOSUB	deleteSnake	go delete last square of snake
 	GOSUB	srR8
-	C=C+1	A
-	C=C+1	A
-	C=C+1	A
-	C=C+1	A
-	GOSUB	srS8
 	GOTO	mainLoop
 
 drawSnake
@@ -354,8 +430,6 @@ drawSnake
 
 
 deleteSnake
-        ?D=0    A
-        RTNYES
         GOSUB   srR9            Get snake y-coord
         LA(5)   34
         GOSBVL  =MUL#           B[A] now equals offset
@@ -369,8 +443,13 @@ deleteSnake
         D0=C
         GOSUB   clearSquare
         D=D-1   A               one square drawn, subtract from squares left to draw
-        GOSUB   deleteSnake     draw next part of snake
-        RTN
+        GOSUB   srR8
+        C=C+1   A
+        C=C+1   A
+        C=C+1   A
+        C=C+1   A
+        GOSUB   srS8
+	RTN
 
 
 
