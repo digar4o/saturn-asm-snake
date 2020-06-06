@@ -228,6 +228,7 @@ INIT
 	ST=1	3		But set 3 to 1, as snake will start by moving right
 	ST=0	4
 	ST=0	5
+	ST=0	6
 
 	C=0	A		Y co-ord top line
 	GOSUB	srS0		
@@ -249,6 +250,20 @@ INIT
 
 	LC(5)	2000		Snake update delay in ticks
 	GOSUB	srS7
+
+	GOSUB	srR6		Get length
+	A=C	A		Store in A
+	A=A+A	A
+	A=A+A	A		multiply by 4 to convert length into pixels
+	GOSUB	srR3		Get initial x-coord into C
+	C=C-A	A		Subtract length from initial x-coord
+	GOSUB	srS8		Store x-coord of last block into S8
+
+	GOSUB	srR4
+	GOSUB	srS9		Stores y-coord of first square into y-coord of last as snake starts horiz.
+	
+
+	
 
 	GOSUB	drawScreen	Draw empty screen, lines and score text
 	
@@ -301,51 +316,78 @@ goRight
 	C=C+1	A
 	C=C+1	A
 	C=C+1	A
+	C=C+1	A
 	GOSUB	srS3
-	GOSUB	srR6
+	LC(5)	1
 	D=C	A
-	GOSUB	drawSnake
+	GOSUB	drawSnake 	go draw one new segment only
+	LC(5)	1
+	D=C	A
+	GOSUB	deleteSnake	go delete last square of snake
+	GOSUB	srR8
+	C=C+1	A
+	C=C+1	A
+	C=C+1	A
+	C=C+1	A
+	GOSUB	srS8
 	GOTO	mainLoop
 
 drawSnake
-	?D=0	A
-	RTNYES
-	GOSUB	srR4		Get snake y-coord
-	LA(5)	34
-	GOSBVL	=MUL#		B[A] now equals offset
-	GOSUB	srR3			Get snake x-coord
-	CSRB.F	A
-	CSRB.F	A
-	C=C-D	A		Always draw next square to the left for now
-	B=B+C	A
-	GOSUB 	srR5
-	C=C+B	A
-	D0=C	
-	GOSUB	drawSquare2
-	D=D-1	A		one square drawn, subtract from squares left to draw
-	GOSUB	drawSnake	draw next part of snake
-	RTN	
+        ?D=0    A
+        RTNYES
+        GOSUB   srR4            Get snake y-coord
+        LA(5)   34
+        GOSBVL  =MUL#           B[A] now equals offset
+        GOSUB   srR3                    Get snake x-coord
+        CSRB.F  A
+        CSRB.F  A
+        C=C-D   A               Always draw next square to the left for now
+	B=B+C   A
+        GOSUB   srR5
+        C=C+B   A		C now contains ABUFF pointer to start of square
+        D0=C
+        GOSUB   drawSquare2
+        D=D-1   A               one square drawn, subtract from squares left to draw
+        GOSUB   drawSnake       draw next part of snake
+        RTN
 
 
 
-drawSquare			Call with D0 set to rightmost,uppermost edge of square to draw
-	LCHEX	15		mask for 011, written to display as 1100, so left two pixels of nibble masked
-	A=DAT0	1
-	C=C&A	B
-	C=C+CON	B,15
-	DAT0=C	1		write top three pixels
-	GOSUB	D0DOWN		Use d0down to change pointer to a row ahead
-	A=DAT0	1
-	C=C&A	B	
-	C=C+CON	B,15
-	DAT0=C	1		write next three pixels of square
-	GOSUB	D0DOWN
-	A=DAT0	1
-	C=C&A	B
-	C=C+CON	B,15
-	DAT0=C	1			write bottom three pixels
-	RTN		
-				
+deleteSnake
+        ?D=0    A
+        RTNYES
+        GOSUB   srR9            Get snake y-coord
+        LA(5)   34
+        GOSBVL  =MUL#           B[A] now equals offset
+        GOSUB   srR8                    Get snake x-coord
+        CSRB.F  A
+        CSRB.F  A
+        C=C-D   A               Always draw next square to the left for now
+        B=B+C   A
+        GOSUB   srR5
+        C=C+B   A               C now contains ABUFF pointer to start of square
+        D0=C
+        GOSUB   clearSquare
+        D=D-1   A               one square drawn, subtract from squares left to draw
+        GOSUB   deleteSnake     draw next part of snake
+        RTN
+
+
+
+clearSquare			Call with D0 set to rightmost, uppermost edge of square to clear
+        LC(5)   0
+        DAT0=C  1
+        GOSUB   D0DOWN
+        LC(5)   0
+        DAT0=C  1
+        GOSUB   D0DOWN
+        LC(5)   0
+        DAT0=C  1
+        GOSUB   D0DOWN
+        LC(5)   0
+        DAT0=C  1
+        RTN
+
 	
 drawSquare2
 	LC(5)	15
@@ -353,7 +395,17 @@ drawSquare2
 	GOSUB	D0DOWN
 	LC(5)	15
 	DAT0=C	1
+	GOSUB	D0DOWN	
+	LC(5)   15
+        DAT0=C  1
+        GOSUB   D0DOWN
+   	LC(5)   15
+        DAT0=C  1
 	RTN
+
+
+
+
 drawLine			Call this to draw a line that spans a row, load y-coord into C before jmp
 	D0=C	A
 	C=0	W
