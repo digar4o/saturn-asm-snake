@@ -225,7 +225,7 @@ INIT
 	ST=0	0		Clear all used status flags
 	ST=0	1
 	ST=0	2
-	ST=0	3		But set 3 to 1, as snake will start by moving right
+	ST=1	3		But set 3 to 1, as snake will start by moving right
 	ST=0	4
 	ST=0	5
 
@@ -277,13 +277,15 @@ drawScreen
 	D=C	A
 	GOSUB	drawSnake 	go draw snake, call with number of squares in D
 
-mainLoop
-	GOSUB	delayInit
 	
+mainLoop
+	GOSUB	delayInit	
 keyLoop
 	GOSUB	delayCheck
-	?ST=1	15
-	GOYES	mainLoop
+	?ST=1	5
+	GOYES	goRight
+
+	
 	LC(3)	001
 	OUT=C
 	GOSBVL	#01160
@@ -292,7 +294,19 @@ keyLoop
 	ST=1	15
 	GOSBVL	=GETPTR
 	GOVLNG	=LOOP	Exits
-	
+
+
+goRight
+	GOSUB	srR3
+	C=C+1	A
+	C=C+1	A
+	C=C+1	A
+	GOSUB	srS3
+	GOSUB	srR6
+	D=C	A
+	GOSUB	drawSnake
+	GOTO	mainLoop
+
 drawSnake
 	?D=0	A
 	RTNYES
@@ -347,7 +361,7 @@ drawLine			Call this to draw a line that spans a row, load y-coord into C before
 
 
 
-delayInit			Get time and store into R3 scratch reg.
+delayInit			Get time and store into R3 scratch reg, clears all registers
 	GOSBVL	=GetTimChk
 	R3=C	
 	RTN		
