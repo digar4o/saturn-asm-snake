@@ -1,4 +1,4 @@
-************************************************************
+
 ************************************************************
 **
 **	Name: Snake Game
@@ -363,11 +363,12 @@ keyRight
         OUT=C
         GOSBVL  =CINRTN
         ?CBIT=0 0
-        GOYES   keyRight        No? Go check left?
+        GOYES   keyRtn        No? Go check left?
         ST=0    0               Yes? Set the UP movement flag and return to loop
         ST=0    1
         ST=0    2
         ST=1    3
+keyRtn
         GOTO keyLoop
 
 
@@ -379,33 +380,50 @@ updateSnake
 	GOYES	goDown
 	?ST=1	2
 	GOYES	goLeft
-	?ST=1	3
-	GOYES	goRight
+	GOLONG	goRight
 
 goUp
+	GOSUB	srR4
+	C=C-CON	A,4
+	GOSUB	srS4
+	LC(5)	1	
+	D=C	A
+	GOSUB	drawSnake
+	LC(5)	1
+	D=C	A
 	GOTO mainLoop
 
 goDown
-	GOTO mainLoop
+	GOSUB   srR4
+        C=C+CON	A,4
+        GOSUB   srS4
+        LC(5)   1
+        D=C     A
+        GOSUB   drawSnake
+        LC(5)   1
+        D=C     A
+        GOTO mainLoop
 
 goLeft
-	GOTO mainLoop
-
+	GOSUB   srR3
+        C=C-CON	A,4
+        GOSUB   srS3
+        LC(5)   1
+        D=C     A
+        GOSUB   drawSnake       go draw one new segment only
+        LC(5)   1
+        D=C     A
+	GOTO    mainLoop
 
 goRight
 	GOSUB	srR3
-	C=C+1	A
-	C=C+1	A
-	C=C+1	A
-	C=C+1	A
+	C=C+CON	A,4
 	GOSUB	srS3
 	LC(5)	1
 	D=C	A
 	GOSUB	drawSnake 	go draw one new segment only
 	LC(5)	1
-	D=C	A
-	GOSUB	deleteSnake	go delete last square of snake
-	GOSUB	srR8
+	D=C	A	go delete last square of snake
 	GOTO	mainLoop
 
 drawSnake
