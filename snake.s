@@ -229,6 +229,11 @@ INIT
 	ST=0	4
 	ST=0	5
 	ST=0	6
+	ST=0	7		7,8,9,10 used to track position of last square
+	ST=0	8
+	ST=0	9
+	ST=0	10
+	
 
 	C=0	A		Y co-ord top line
 	GOSUB	srS0		
@@ -245,7 +250,7 @@ INIT
 	LC(5)	30		Starting y co-ord for snake
 	GOSUB	srS4	
 	
-	LC(5)	0		Store initial snake length in pixels
+	LC(5)	3		Store initial snake length in pixels
 	GOSUB	srS6
 
 	LC(5)	2000		Snake update delay in ticks
@@ -424,6 +429,7 @@ goRight
 	GOSUB	drawSnake 	go draw one new segment only
 	LC(5)	1
 	D=C	A	go delete last square of snake
+	GOSUB	deleteSnake
 	GOTO	mainLoop
 
 drawSnake
@@ -461,7 +467,7 @@ deleteSnake
         D0=C
         GOSUB   clearSquare
         D=D-1   A               one square drawn, subtract from squares left to draw
-        GOSUB   srR8
+        GOSUB   srR8		add 4 pixels to srR8 so to get new location of last square (for left)
         C=C+1   A
         C=C+1   A
         C=C+1   A
@@ -484,6 +490,7 @@ clearSquare			Call with D0 set to rightmost, uppermost edge of square to clear
         LC(5)   0
         DAT0=C  1
         RTN
+
 
 	
 drawSquare2
